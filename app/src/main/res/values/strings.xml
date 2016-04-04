@@ -1,0 +1,19 @@
+<resources>
+
+    <string name="app_name">YandexMobdev</string>
+    <string name="actionbar_name_artists">Исполнители</string>
+
+
+    <!-- шрифты -->
+    <string name="roboto.regular">sans-serif</string>
+    <string name="roboto.light">sans-serif-light</string>
+    <string name="roboto.condensed">sans-serif-condensed</string>
+    <string name="roboto.thin">sans-serif-thin</string>
+    <string name="roboto.medium">sans-serif-medium</string>
+    <string name="artist_smallicon_desc">Artist Small Icon</string>
+    <string name="internet_issue">Проблемы с интернетом!</string>
+    <string name="detail_bio_title">Биография</string>
+    <string name="detail_image_desc">Detail Big Image</string>
+
+
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/border"
+    android:paddingBottom="@dimen/artist_preview_margin">
+<!-- на 4.0.3 Обнаружил баг, где margin не применялся к bottom,
+поэтому пришлось сделать paddingBottom на RelativeLayout и убрать layout_margin у ImageView-->
+    <ImageView
+        android:layout_width="@dimen/artist_preview_size"
+        android:layout_height="@dimen/artist_preview_size"
+        android:id="@+id/artistPreview"
+        android:contentDescription="@string/artist_smallicon_desc"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="@dimen/artist_preview_margin"
+        android:layout_marginRight="@dimen/artist_preview_margin"
+        android:layout_marginLeft="@dimen/artist_preview_margin"
+        android:background="@drawable/placeholder" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Medium Text"
+        android:id="@+id/artistName"
+        android:textColor="@color/black"
+        android:layout_alignTop="@+id/artistPreview"
+        android:layout_toRightOf="@+id/artistPreview"
+        android:layout_toEndOf="@+id/artistPreview"
+        android:layout_marginTop="@dimen/artist_name_margin_top" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/artistGenre"
+        android:textColor="@color/grey"
+        android:layout_below="@+id/artistName"
+        android:layout_marginTop="@dimen/artist_genres_margin_top"
+        android:layout_alignLeft="@+id/artistName"
+        android:layout_alignStart="@+id/artistName" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/artistSongs"
+        android:textColor="@color/grey"
+        android:layout_alignBottom="@+id/artistPreview"
+        android:layout_alignLeft="@+id/artistGenre"
+        android:layout_alignStart="@+id/artistGenre" />
+</RelativeLayout>
