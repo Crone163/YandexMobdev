@@ -14,14 +14,15 @@ import com.crone.yandexmobdev.utils.MyAnimationUtils;
 import com.crone.yandexmobdev.viewholders.ArtistViewHolder;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
 
-    private List<ParseJsonModel> mParse;
+    private ArrayList<ParseJsonModel> mParse;
     private int mPreviousPosition = 0;
 
-    public ArtistAdapter(List<ParseJsonModel> parseJsonModels) {
+    public ArtistAdapter(ArrayList<ParseJsonModel> parseJsonModels) {
         this.mParse = parseJsonModels;
     }
 

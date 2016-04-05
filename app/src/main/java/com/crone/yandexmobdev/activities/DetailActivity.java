@@ -49,9 +49,9 @@ public class DetailActivity extends AppCompatActivity {
         TextView tracksAndAlbums = (TextView) findViewById(R.id.tracksAText);
         tracksAndAlbums.setText(albums + "  •  " + songs);
 
-        TextView desc = (TextView)findViewById(R.id.biographyContent);
-        if(desc != null)
-        desc.setText(intent.getStringExtra(ConstantManager.DESC_DETAIL));
+        TextView desc = (TextView) findViewById(R.id.biographyContent);
+        if (desc != null)
+            desc.setText(intent.getStringExtra(ConstantManager.DESC_DETAIL));
 
 
         mBigIcon = intent.getStringExtra(ConstantManager.BIGICON_DETAIL);
@@ -66,7 +66,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        ImageView bigIcon = (ImageView) findViewById(R.id.bigImage);
+        final ImageView bigIcon = (ImageView) findViewById(R.id.bigImage);
         // при повороте экрана Picasso хранит картинку в кэше и поэтому возникала сложность с отрисовкой,
         // пришлось убрать картинку из памяти memoryPolicy(MemoryPolicy.NO_CACHE)
         Picasso.with(this)
@@ -82,6 +82,9 @@ public class DetailActivity extends AppCompatActivity {
                     @Override
                     public void onError() {
                         setInvisibleLoading();
+                        if (bigIcon != null){
+                            Picasso.with(bigIcon.getContext()).load(R.drawable.square).fit().centerInside().into(bigIcon);
+                        }
                     }
                 });
     }

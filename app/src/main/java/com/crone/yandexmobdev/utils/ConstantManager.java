@@ -19,5 +19,6 @@ public class ConstantManager {
     public static final String COVER = "cover";
     public static final String SMALLICON = "small";
     public static final String BIGICON = "big";
+    public static final String PARCABLE_SAVE = "parcable_save";
 
 }

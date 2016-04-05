@@ -82,9 +82,10 @@ public class ArtistsFragment extends Fragment {
 
 
     @Override
-    public void onViewCreated(View view, final Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRecyvleView = (RecyclerView) mView.findViewById(R.id.recycle);
+
         mRecyvleView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getContext(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
@@ -104,33 +105,38 @@ public class ArtistsFragment extends Fragment {
                 })
         );
 
-        if (savedInstanceState == null) {
-            LinearLayoutManager mLayoutManager = new LinearLayoutManager(mView.getContext());
-            mRecyvleView.setLayoutManager(mLayoutManager);
+        if (savedInstanceState != null) {
+            mDataList = savedInstanceState.getParcelableArrayList(ConstantManager.PARCABLE_SAVE);
         }
 
         final ArtistAdapter rvAdapter = new ArtistAdapter(mDataList);
         mRecyvleView.setAdapter(rvAdapter);
 
-        final ProgressBar progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(mView.getContext());
+        mRecyvleView.setLayoutManager(mLayoutManager);
 
-        final RequestQueue requestQueue = Volley.newRequestQueue(mView.getContext());
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(ConstantManager.URLJSON, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                if (response.length() > 0) {
-                    for (int i = 0; i < response.length(); i++) {
-                        try {
-                            dataToArray(response, i);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+
+        if (savedInstanceState == null) {
+
+            final ProgressBar progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.VISIBLE);
+            final RequestQueue requestQueue = Volley.newRequestQueue(mView.getContext());
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(ConstantManager.URLJSON, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    if (response.length() > 0) {
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                dataToArray(response, i);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                    // обновляем адаптер
-                    rvAdapter.notifyDataSetChanged();
+                        // обновляем адаптер
+                        rvAdapter.notifyDataSetChanged();
 
-                    // создаем поток в котором будет записываться ответ от сервера в файл кеша.
-                    if (savedInstanceState == null) {
+                        // создаем поток в котором будет записываться ответ от сервера в файл кеша.
+
                         final String lastResponse = response.toString();
                         Handler mHandler = new Handler();
                         Runnable runnable = new Runnable() {
@@ -140,23 +146,31 @@ public class ArtistsFragment extends Fragment {
                             }
                         };
                         mHandler.post(runnable);
+
+                        // после обработки данных прячем прогресс бар.
+                        progressBar.setVisibility(View.GONE);
                     }
-                    // после обработки данных прячем прогресс бар.
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // если ошибка при парсинке, то берем локальную версию JSON.
+                    setDataFromCache(rvAdapter);
                     progressBar.setVisibility(View.GONE);
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // если ошибка при парсинке, то берем локальную версию JSON.
-                if (savedInstanceState == null)
-                    setDataFromCache(rvAdapter);
-                progressBar.setVisibility(View.GONE);
-            }
-        });
+            });
 
-        requestQueue.add(jsonArrayRequest);
+            requestQueue.add(jsonArrayRequest);
+        }
     }
+
+    // сохраняем ArrayList в Bundle
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(ConstantManager.PARCABLE_SAVE, mDataList);
+    }
+
 
     /**
      * создает файл в кэше с последним ответом от сервера.
