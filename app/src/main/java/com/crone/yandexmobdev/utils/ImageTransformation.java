@@ -12,15 +12,15 @@ import com.squareup.picasso.Transformation;
 // стандарный centerCrop от picasso не правильно размещал картинку, вырезая верхнею часть,
 // для правильного размещения создана трансформация Bitmap под размеры ImageView
 public class ImageTransformation {
-    public static Transformation getTransformation(final ImageView imageView) {
+    public static Transformation getTransformation(final int width, final int height) {
         return new Transformation() {
 
             @Override public Bitmap transform(Bitmap source) {
-                Bitmap background = Bitmap.createBitmap((int) imageView.getWidth(), (int) imageView.getHeight(), Bitmap.Config.RGB_565);
+                Bitmap background = Bitmap.createBitmap((int) width, (int) height, Bitmap.Config.RGB_565);
                 float originalWidth = source.getWidth(), originalHeight = source.getHeight();
                 Canvas canvas = new Canvas(background);
-                float scale = imageView.getWidth()/originalWidth;
-                float xTranslation = 0.0f, yTranslation = (imageView.getHeight() - originalHeight * scale)/15.0f;
+                float scale = width/originalWidth;
+                float xTranslation = 0.0f, yTranslation = (height - originalHeight * scale)/15.0f;
                 Matrix transformation = new Matrix();
                 transformation.postTranslate(xTranslation, yTranslation);
                 transformation.preScale(scale, scale);
