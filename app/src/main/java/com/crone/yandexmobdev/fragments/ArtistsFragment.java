@@ -295,17 +295,14 @@ public class ArtistsFragment extends Fragment {
      * @return - возвращает ссылку на big icon.
      */
     private String getBigIconFromCache(int id) {
-        String bigIcon = null;
-        String responseFromCache = readJsonData(ConstantManager.CACHEFILE);
-        int g = 0;
-        if (responseFromCache != null) {
+        String bigIcon =  readJsonData(ConstantManager.CACHEFILE);
+        if (bigIcon != null) {
             try {
-                JSONArray jsonArray = new JSONArray(responseFromCache);
+                JSONArray jsonArray = new JSONArray(bigIcon);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     if (!jsonObject.isNull(ConstantManager.ID)) {
-                        g = jsonObject.getInt(ConstantManager.ID);
-                        if (g == id) {
+                        if (jsonObject.getInt(ConstantManager.ID) == id) {
                             bigIcon = jsonObject.getString(ConstantManager.COVER);
                             JSONObject jObject = new JSONObject(bigIcon);
                             bigIcon = jObject.getString(ConstantManager.BIGICON);
@@ -328,17 +325,14 @@ public class ArtistsFragment extends Fragment {
      * @return - описание исполнителя
      */
     private String getDescriptionFromCache(int id) {
-        String desc = null;
-        String responseFromCache = readJsonData(ConstantManager.CACHEFILE);
-        int g = 0;
-        if (responseFromCache != null) {
+        String desc = readJsonData(ConstantManager.CACHEFILE);
+        if (desc != null) {
             try {
-                JSONArray jsonArray = new JSONArray(responseFromCache);
+                JSONArray jsonArray = new JSONArray(desc);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     if (!jsonObject.isNull(ConstantManager.ID)) {
-                        g = jsonObject.getInt(ConstantManager.ID);
-                        if (g == id) {
+                        if (jsonObject.getInt(ConstantManager.ID) == id) {
                             desc = jsonObject.getString(ConstantManager.DESCRIPTION);
                             break;
                         }
