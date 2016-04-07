@@ -2,4 +2,4 @@
 
 APK: https://yadi.sk/d/UIhQez4rqnLtv
 
-![Alt Text](http://imgur.com/tMpXVxx)
+![Alt Text](http://i.imgur.com/tMpXVxx.gif)
