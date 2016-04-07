@@ -20,5 +20,6 @@ public class ConstantManager {
     public static final String SMALLICON = "small";
     public static final String BIGICON = "big";
     public static final String PARCABLE_SAVE = "parcable_save";
+    public static final String RGB_PREFIX = "rgbprefix";
 
 }

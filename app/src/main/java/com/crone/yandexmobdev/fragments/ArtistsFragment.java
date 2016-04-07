@@ -159,7 +159,6 @@ public class ArtistsFragment extends Fragment {
                     progressBar.setVisibility(View.GONE);
                 }
             });
-
             requestQueue.add(jsonArrayRequest);
         }
     }

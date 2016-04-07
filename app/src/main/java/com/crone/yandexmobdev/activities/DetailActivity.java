@@ -1,6 +1,7 @@
 package com.crone.yandexmobdev.activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -15,6 +16,7 @@ import com.crone.yandexmobdev.utils.ConstantManager;
 import com.crone.yandexmobdev.utils.ConvertNumbers;
 
 import com.crone.yandexmobdev.utils.ImageTransformation;
+//import com.crone.yandexmobdev.utils.downloadCMYKImage;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.MemoryPolicy;
 
@@ -84,9 +86,12 @@ public class DetailActivity extends AppCompatActivity {
                                 @Override
                                 public void onError() {
                                     setInvisibleLoading();
-                                    if (bigIcon != null) {
-                                        Picasso.with(bigIcon.getContext()).load(R.drawable.square).fit().centerInside().into(bigIcon);
-                                    }
+                                    Picasso.with(bigIcon.getContext()).load(R.drawable.square).fit().centerInside().into(bigIcon);
+                                        // CMYK image
+                                       /* if (Build.VERSION.SDK_INT <= 17) {
+                                            new downloadCMYKImage(bigIcon,bigIcon.getContext()).execute(mBigIcon);
+                                        }*/
+
                                 }
                             });
                     return true;

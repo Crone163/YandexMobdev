@@ -1,7 +1,10 @@
 package com.crone.yandexmobdev.adapters;
 
 import android.content.Context;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -10,17 +13,28 @@ import android.view.View;
 import com.crone.yandexmobdev.R;
 import com.crone.yandexmobdev.models.ParseJsonModel;
 import com.crone.yandexmobdev.utils.ConvertNumbers;
-import com.crone.yandexmobdev.utils.MyAnimationUtils;
-import com.crone.yandexmobdev.viewholders.ArtistViewHolder;
-import com.squareup.picasso.Picasso;
 
+import com.crone.yandexmobdev.utils.MyAnimationUtils;
+import com.crone.yandexmobdev.utils.downloadCMYKImage;
+import com.crone.yandexmobdev.viewholders.ArtistViewHolder;
+
+
+
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+
+import android.widget.ImageView;
+
 
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
 
     private ArrayList<ParseJsonModel> mParse;
     private int mPreviousPosition = 0;
+
 
     public ArtistAdapter(ArrayList<ParseJsonModel> parseJsonModels) {
         this.mParse = parseJsonModels;
@@ -38,17 +52,28 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(ArtistViewHolder holder, int position) {
+    public void onBindViewHolder( final ArtistViewHolder holder,final    int position) {
         // название исполнителя
         holder.artistName.setText(mParse.get(position).name);
         // жанры
         holder.artistGenres.setText(mParse.get(position).geners);
-        //преобразовываем ссылку на cover в URI
-        Uri uri = Uri.parse(mParse.get(position).urlcover);
-        // получаем контекст для Picasso
-        Context context = holder.artistPreview.getContext();
         // загружаем картинку в ImageView
-        Picasso.with(context).load(uri).into(holder.artistPreview);
+        Picasso.with(holder.artistPreview.getContext()).load(mParse.get(position).urlcover)
+                .fit()
+                .centerCrop()
+                .into(holder.artistPreview, new Callback() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        if (Build.VERSION.SDK_INT <= 17) {
+                            new downloadCMYKImage(holder.artistPreview).execute(mParse.get(position).urlcover);
+                        }
+                    }
+                });
         // альбомы + артисты
         ConvertNumbers convert = new ConvertNumbers();
         // конвертация склонения песен
@@ -67,6 +92,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
     }
 
 
+
     @Override
     public int getItemCount() {
         if (mParse != null) {
@@ -74,4 +100,8 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
         }
         return 0;
     }
+
+
+
+
 }
