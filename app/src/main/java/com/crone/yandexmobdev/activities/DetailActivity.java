@@ -1,10 +1,15 @@
 package com.crone.yandexmobdev.activities;
 
+import android.app.ActionBar;
 import android.content.Intent;
-import android.os.Build;
+
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import android.support.v7.widget.Toolbar;
+
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -16,7 +21,7 @@ import com.crone.yandexmobdev.utils.ConstantManager;
 import com.crone.yandexmobdev.utils.ConvertNumbers;
 
 import com.crone.yandexmobdev.utils.ImageTransformation;
-//import com.crone.yandexmobdev.utils.downloadCMYKImage;
+
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.MemoryPolicy;
 
@@ -87,7 +92,7 @@ public class DetailActivity extends AppCompatActivity {
                                 public void onError() {
                                     setInvisibleLoading();
                                     Picasso.with(bigIcon.getContext()).load(R.drawable.square).fit().centerInside().into(bigIcon);
-                                        // CMYK image
+                                    // CMYK image
                                        /* if (Build.VERSION.SDK_INT <= 17) {
                                             new downloadCMYKImage(bigIcon,bigIcon.getContext()).execute(mBigIcon);
                                         }*/
@@ -100,12 +105,32 @@ public class DetailActivity extends AppCompatActivity {
 
         }
 
-        if (getSupportActionBar() != null) {
+
+        if(getSupportActionBar() != null){
             getSupportActionBar().setTitle(title);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+
+
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
     private void setInvisibleLoading() {
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.loadingImageDetail);

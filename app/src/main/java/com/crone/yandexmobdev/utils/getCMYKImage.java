@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,6 +15,9 @@ import magick.ColorspaceType;
 import magick.ImageInfo;
 import magick.MagickImage;
 import magick.util.MagickBitmap;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 /**
@@ -26,7 +30,7 @@ public class getCMYKImage {
 
     private Context mContext;
 
-    public getCMYKImage(Context context){
+    public getCMYKImage(Context context) {
         this.mContext = context;
     }
 
@@ -59,24 +63,26 @@ public class getCMYKImage {
      */
     public Bitmap getCMYKImageFromURL(String urlString) {
         String name = urlString;
-        name = name.substring(name.length()-24,name.length()-8);
-        SAVING_PATH = mContext.getCacheDir() + "/"+name;
+        name = name.substring(name.length() - 24, name.length() - 8);
+        SAVING_PATH = mContext.getCacheDir() + "/" + name;
         File file = new File(SAVING_PATH);
-        if(new File(SAVING_PATH+ConstantManager.RGB_PREFIX).exists()){
+        if (new File(SAVING_PATH + ConstantManager.RGB_PREFIX).exists()) {
             return null;
         }
         Bitmap bitmap = null;
-        if(file.exists()){
+        if (file.exists()) {
             bitmap = getCMYKImageFromPath(SAVING_PATH);
         } else {
-            downloadFile(urlString, SAVING_PATH);
-            bitmap = getCMYKImageFromPath(SAVING_PATH);
+            if (netCheckin()) {
+                downloadFile(urlString, SAVING_PATH);
+                bitmap = getCMYKImageFromPath(SAVING_PATH);
+            }
         }
 
         return bitmap;
     }
 
-    public String getSavingPath(){
+    public String getSavingPath() {
         return SAVING_PATH;
     }
 
@@ -88,22 +94,47 @@ public class getCMYKImage {
      */
     private void downloadFile(String urlString, String savingPath) {
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setDoOutput(true);
-            urlConnection.connect();
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(urlString);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setDoOutput(true);
+                urlConnection.connect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             File file = new File(savingPath); // save file here
             FileOutputStream fileOutput = new FileOutputStream(file);
-            InputStream inputStream = urlConnection.getInputStream();
-            byte[] buffer = new byte[1024];
-            int bufferLength = 0; //used to store a temporary size of the buffer
-            while ((bufferLength = inputStream.read(buffer)) > 0) {
-                fileOutput.write(buffer, 0, bufferLength);
+            if (urlConnection != null) {
+                InputStream inputStream = urlConnection.getInputStream();
+                byte[] buffer = new byte[1024];
+                int bufferLength = 0; //used to store a temporary size of the buffer
+                while ((bufferLength = inputStream.read(buffer)) > 0) {
+                    fileOutput.write(buffer, 0, bufferLength);
+                }
             }
             fileOutput.close();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+
+    private boolean netCheckin() {
+        try {
+            ConnectivityManager nInfo = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            nInfo.getActiveNetworkInfo().isConnectedOrConnecting();
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            return netInfo != null && netInfo.isConnectedOrConnecting();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }

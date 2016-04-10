@@ -2,7 +2,6 @@ package com.crone.yandexmobdev.utils;
 
 public class ConstantManager {
     public static final String URLJSON = "http://download.cdn.yandex.net/mobilization-2016/artists.json";
-    public static final String CACHEFILE = "cacheArtists.ya";
     public static final String LIST_STATE_KEY = "list_state_key";
     public static final String ID = "id";
     public static final String DESCRIPTION = "description";

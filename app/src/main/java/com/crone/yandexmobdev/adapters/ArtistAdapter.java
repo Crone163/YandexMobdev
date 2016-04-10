@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.crone.yandexmobdev.R;
 import com.crone.yandexmobdev.models.ParseJsonModel;
+import com.crone.yandexmobdev.utils.ConstantManager;
 import com.crone.yandexmobdev.utils.ConvertNumbers;
 
 import com.crone.yandexmobdev.utils.MyAnimationUtils;
@@ -24,6 +25,7 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -62,6 +64,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
                 .fit()
                 .centerCrop()
                 .into(holder.artistPreview, new Callback() {
+
                     @Override
                     public void onSuccess() {
 
@@ -69,6 +72,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder> {
 
                     @Override
                     public void onError() {
+                        // Сначало Picasso парсит картинку CMYK, спустя время он должен понять что не может декодировать картинку
                         if (Build.VERSION.SDK_INT <= 17) {
                             new downloadCMYKImage(holder.artistPreview).execute(mParse.get(position).urlcover);
                         }

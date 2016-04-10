@@ -12,6 +12,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.actionbar_name_artists);
+        }
+
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_activity, ArtistsFragment.newInstance())

@@ -1,89 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/scrollView" >
+        android:layout_height="wrap_content">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <ImageView
+                android:id="@+id/bigImage"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/detail_image_height"
-                android:id="@+id/bigImage"
                 android:layout_alignParentTop="true"
                 android:contentDescription="@string/detail_image_desc" />
 
             <TextView
+                android:id="@+id/genresText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Small Text"
-                android:id="@+id/genresText"
-                android:layout_marginTop="@dimen/artist_preview_margin"
-                android:layout_marginLeft="@dimen/artist_preview_margin"
-                android:textColor="@color/detail_grey"
+                android:layout_alignLeft="@+id/bigImage"
                 android:layout_alignParentLeft="false"
                 android:layout_alignParentTop="false"
-                android:layout_alignLeft="@+id/bigImage"
-                android:layout_below="@+id/bigImage" />
+                android:layout_below="@+id/bigImage"
+                android:layout_marginLeft="@dimen/artist_preview_margin"
+                android:layout_marginTop="@dimen/artist_preview_margin"
+                android:text="Small Text"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/detail_grey" />
 
             <TextView
+                android:id="@+id/tracksAText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Small Text"
-                android:id="@+id/tracksAText"
-                android:textColor="@color/detail_grey"
-                android:layout_marginTop="@dimen/artist_preview_margin"
+                android:layout_alignLeft="@+id/genresText"
                 android:layout_alignParentLeft="false"
                 android:layout_alignParentTop="false"
                 android:layout_below="@+id/genresText"
-                android:layout_alignLeft="@+id/genresText" />
+                android:layout_marginTop="@dimen/artist_preview_margin"
+                android:text="Small Text"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/detail_grey" />
 
             <TextView
+                android:id="@+id/biographyTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/detail_bio_title"
-                android:id="@+id/biographyTitle"
-                android:textColor="@color/black"
+                android:layout_alignLeft="@+id/tracksAText"
                 android:layout_alignParentLeft="false"
                 android:layout_alignParentTop="false"
-                android:layout_alignLeft="@+id/tracksAText"
                 android:layout_below="@+id/tracksAText"
-                android:layout_marginTop="@dimen/artist_preview_margin" />
+                android:layout_marginTop="@dimen/artist_preview_margin"
+                android:text="@string/detail_bio_title"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/black" />
 
             <TextView
+                android:id="@+id/biographyContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Medium Text"
-                android:id="@+id/biographyContent"
-                android:textColor="@color/black"
                 android:layout_alignParentLeft="false"
                 android:layout_alignParentTop="false"
                 android:layout_below="@+id/biographyTitle"
-                android:layout_marginTop="@dimen/artist_name_margin_top"
-                android:layout_marginRight="@dimen/artist_preview_margin"
                 android:layout_marginLeft="@dimen/artist_preview_margin"
-                android:paddingBottom="@dimen/artist_preview_margin"/>
+                android:layout_marginRight="@dimen/artist_preview_margin"
+                android:layout_marginTop="@dimen/artist_name_margin_top"
+                android:paddingBottom="@dimen/artist_preview_margin"
+                android:text="Medium Text"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/black" />
 
             <ProgressBar
+                android:id="@+id/loadingImageDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/loadingImageDetail"
                 android:layout_alignParentTop="false"
-                android:layout_marginTop="@dimen/detail_progressbar_height"
                 android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/detail_progressbar_height"
                 android:visibility="visible" />
         </RelativeLayout>
     </ScrollView>
+
 
 </RelativeLayout>

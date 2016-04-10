@@ -31,24 +31,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
-
-import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.util.Log;
 
 public class ArtistsFragment extends Fragment {
 
-    private View mView;
     private static Bundle mBundleRecyclerViewState;
-    private RecyclerView mRecyvleView;
+    private RecyclerView mRecycleView;
     private ArrayList<ParseJsonModel> mDataList = new ArrayList<>();
+    private ArtistAdapter mArtistAdapter;
+    private RequestQueue mRequestQueue;
 
     public static ArtistsFragment newInstance() {
         return new ArtistsFragment();
@@ -57,36 +51,47 @@ public class ArtistsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_artists, container, false);
-        return mView;
+        return inflater.inflate(R.layout.fragment_artists, container, false);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        // сохраняем состояние RecyvleView при повороте экрана
+        // сохраняем состояние RecycleView
         mBundleRecyclerViewState = new Bundle();
-        Parcelable listState = mRecyvleView.getLayoutManager().onSaveInstanceState();
+        Parcelable listState = mRecycleView.getLayoutManager().onSaveInstanceState();
         mBundleRecyclerViewState.putParcelable(ConstantManager.LIST_STATE_KEY, listState);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // возвращаем состояние при повороте
+        // возвращаем состояние
         if (mBundleRecyclerViewState != null) {
             Parcelable listState = mBundleRecyclerViewState.getParcelable(ConstantManager.LIST_STATE_KEY);
-            mRecyvleView.getLayoutManager().onRestoreInstanceState(listState);
+            mRecycleView.getLayoutManager().onRestoreInstanceState(listState);
+            // Если свернули приложение, чтобы включить интернет, то после возвращения делаем заново запрос.
+            if (mDataList.size() == 0) {
+                setRequestQueue(mRequestQueue, mArtistAdapter);
+            }
         }
+
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyvleView = (RecyclerView) mView.findViewById(R.id.recycle);
+        mRecycleView = (RecyclerView) view.findViewById(R.id.recycle);
 
-        mRecyvleView.addOnItemTouchListener(
+        mRequestQueue = Volley.newRequestQueue(getContext());
+
+        mRecycleView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getContext(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
@@ -97,8 +102,8 @@ public class ArtistsFragment extends Fragment {
                             intent.putExtra(ConstantManager.TRACKS_DETAIL, mDataList.get(position).tracks);
                             intent.putExtra(ConstantManager.ALBUMS_DETAIL, mDataList.get(position).albums);
                             // парсим большую иконку и описание из локального JSON.
-                            intent.putExtra(ConstantManager.BIGICON_DETAIL, getBigIconFromCache(mDataList.get(position).id));
-                            intent.putExtra(ConstantManager.DESC_DETAIL, getDescriptionFromCache(mDataList.get(position).id));
+                            intent.putExtra(ConstantManager.BIGICON_DETAIL, getBigIconFromCache(mDataList.get(position).id, mRequestQueue));
+                            intent.putExtra(ConstantManager.DESC_DETAIL, getDescriptionFromCache(mDataList.get(position).id, mRequestQueue));
                             startActivity(intent);
                         }
                     }
@@ -109,57 +114,14 @@ public class ArtistsFragment extends Fragment {
             mDataList = savedInstanceState.getParcelableArrayList(ConstantManager.PARCABLE_SAVE);
         }
 
-        final ArtistAdapter rvAdapter = new ArtistAdapter(mDataList);
-        mRecyvleView.setAdapter(rvAdapter);
+        mArtistAdapter = new ArtistAdapter(mDataList);
+        mRecycleView.setAdapter(mArtistAdapter);
 
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(mView.getContext());
-        mRecyvleView.setLayoutManager(mLayoutManager);
-
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+        mRecycleView.setLayoutManager(mLayoutManager);
 
         if (savedInstanceState == null) {
-
-            final ProgressBar progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.VISIBLE);
-            final RequestQueue requestQueue = Volley.newRequestQueue(mView.getContext());
-            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(ConstantManager.URLJSON, new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray response) {
-                    if (response.length() > 0) {
-                        for (int i = 0; i < response.length(); i++) {
-                            try {
-                                dataToArray(response, i);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        // обновляем адаптер
-                        rvAdapter.notifyDataSetChanged();
-
-                        // создаем поток в котором будет записываться ответ от сервера в файл кеша.
-
-                        final String lastResponse = response.toString();
-                        Handler mHandler = new Handler();
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                createAndSaveFile(ConstantManager.CACHEFILE, lastResponse);
-                            }
-                        };
-                        mHandler.post(runnable);
-
-                        // после обработки данных прячем прогресс бар.
-                        progressBar.setVisibility(View.GONE);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    // если ошибка при парсинке, то берем локальную версию JSON.
-                    setDataFromCache(rvAdapter);
-                    progressBar.setVisibility(View.GONE);
-                }
-            });
-            requestQueue.add(jsonArrayRequest);
+            setRequestQueue(mRequestQueue, mArtistAdapter);
         }
     }
 
@@ -170,57 +132,56 @@ public class ArtistsFragment extends Fragment {
         outState.putParcelableArrayList(ConstantManager.PARCABLE_SAVE, mDataList);
     }
 
-
     /**
-     * создает файл в кэше с последним ответом от сервера.
+     * Используется в приложении при первом запуске, парсится с интернета JSON, если ошибка, то берем JSON из кэша.
      *
-     * @param params        - имя файла кэша.
-     * @param mJsonResponse - полученный JSON от сервера.
+     * @param requestQueue - передаем Volley request.
+     * @param rvAdapter    - передаем ArtistAdapter.
      */
-    public void createAndSaveFile(String params, String mJsonResponse) {
-        try {
-            FileWriter file = new FileWriter(getActivity().getCacheDir() + "/" + params);
-            file.write(mJsonResponse);
-            file.flush();
-            file.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void setRequestQueue(final RequestQueue requestQueue, final ArtistAdapter rvAdapter) {
+        final ProgressBar progressBar = (ProgressBar) getActivity().findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(ConstantManager.URLJSON, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                if (response.length() > 0) {
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            dataToArray(response, i);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    // обновляем адаптер
+                    rvAdapter.notifyDataSetChanged();
+                    // после обработки данных прячем прогресс бар.
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (requestQueue.getCache().get(ConstantManager.URLJSON) != null) {
+                    setDataFromCache(rvAdapter, new String(requestQueue.getCache().get(ConstantManager.URLJSON).data));
+                    progressBar.setVisibility(View.GONE);
+                } else {
+                    Toast.makeText(getActivity(), R.string.internet_issue, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        requestQueue.add(jsonArrayRequest);
     }
 
-    /**
-     * считываем файл в котором хранится последний ответ в JSON.
-     *
-     * @param params - имя файла кэша.
-     * @return - возвращает JSON из файла кэша.
-     */
-    private String readJsonData(String params) {
-        String mResponse = null;
-        try {
-            File f = new File(getActivity().getCacheDir() + "/" + params);
-            FileInputStream is = new FileInputStream(f);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            mResponse = new String(buffer);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return mResponse;
-    }
 
     /**
      * в ArrayList заносится информация с локального JSON и передается в RecycleView.
      *
      * @param adapter - в какой адаптер будет заноситься информация.
      */
-    private void setDataFromCache(ArtistAdapter adapter) {
-        String responseFromCache = readJsonData(ConstantManager.CACHEFILE);
-        if (responseFromCache != null) {
+    private void setDataFromCache(ArtistAdapter adapter, String cacheRequest) {
+        if (cacheRequest != null) {
             try {
-                JSONArray jsonArray = new JSONArray(responseFromCache);
+                JSONArray jsonArray = new JSONArray(cacheRequest);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     dataToArray(jsonArray, i);
                 }
@@ -229,10 +190,7 @@ public class ArtistsFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-
         } else {
-            // TODO добавить сообщение на отсутствие интернета
             Toast.makeText(getActivity(), R.string.internet_issue, Toast.LENGTH_SHORT).show();
         }
     }
@@ -293,26 +251,24 @@ public class ArtistsFragment extends Fragment {
      * @param id - указываем ID исполнителя на которого нажали.
      * @return - возвращает ссылку на big icon.
      */
-    private String getBigIconFromCache(int id) {
-        String bigIcon =  readJsonData(ConstantManager.CACHEFILE);
-        if (bigIcon != null) {
-            try {
-                JSONArray jsonArray = new JSONArray(bigIcon);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if (!jsonObject.isNull(ConstantManager.ID)) {
-                        if (jsonObject.getInt(ConstantManager.ID) == id) {
-                            bigIcon = jsonObject.getString(ConstantManager.COVER);
-                            JSONObject jObject = new JSONObject(bigIcon);
-                            bigIcon = jObject.getString(ConstantManager.BIGICON);
-                            break;
-                        }
+    private String getBigIconFromCache(int id, RequestQueue requestQueue) {
+        String bigIcon = new String(requestQueue.getCache().get(ConstantManager.URLJSON).data);
+        try {
+            JSONArray jsonArray = new JSONArray(bigIcon);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (!jsonObject.isNull(ConstantManager.ID)) {
+                    if (jsonObject.getInt(ConstantManager.ID) == id) {
+                        bigIcon = jsonObject.getString(ConstantManager.COVER);
+                        JSONObject jObject = new JSONObject(bigIcon);
+                        bigIcon = jObject.getString(ConstantManager.BIGICON);
+                        break;
                     }
-
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return bigIcon;
     }
@@ -323,23 +279,21 @@ public class ArtistsFragment extends Fragment {
      * @param id - указываем ID исполнителя на которого нажали.
      * @return - описание исполнителя
      */
-    private String getDescriptionFromCache(int id) {
-        String desc = readJsonData(ConstantManager.CACHEFILE);
-        if (desc != null) {
-            try {
-                JSONArray jsonArray = new JSONArray(desc);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if (!jsonObject.isNull(ConstantManager.ID)) {
-                        if (jsonObject.getInt(ConstantManager.ID) == id) {
-                            desc = jsonObject.getString(ConstantManager.DESCRIPTION);
-                            break;
-                        }
+    private String getDescriptionFromCache(int id, RequestQueue requestQueue) {
+        String desc = new String(requestQueue.getCache().get(ConstantManager.URLJSON).data);
+        try {
+            JSONArray jsonArray = new JSONArray(desc);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (!jsonObject.isNull(ConstantManager.ID)) {
+                    if (jsonObject.getInt(ConstantManager.ID) == id) {
+                        desc = jsonObject.getString(ConstantManager.DESCRIPTION);
+                        break;
                     }
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return desc;
     }
